@@ -1,0 +1,15 @@
+# Rename this file to config.conf when finished
+# Do not use quotes (") around the values
+
+[EMAIL]
+# Email Notifications
+from_email = from@domain.com
+to_email = to@domain.com
+mail_server =  mailserver.domain.com
+
+[KODIDB]
+# Kodi Database Credentials
+server = kodidb.server.com
+username = username
+password = supersecret
+database = MyVideos116
