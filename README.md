@@ -1,2 +1,4 @@
-# home-ansible
-Ansible playbooks for my home use
+# home-code
+Misc code projects for home use.
+
+Ansible and Python
