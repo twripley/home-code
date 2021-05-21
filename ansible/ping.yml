@@ -1,0 +1,7 @@
+---
+  hosts: all
+  gather_facts: yes
+
+  tasks:
+    - name: Test Ping
+        action: ping
