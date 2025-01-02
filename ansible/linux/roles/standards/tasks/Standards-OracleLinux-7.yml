@@ -1,0 +1,26 @@
+---
+# Configures OEL7 for standards
+
+- name: Enable FastestMirror YUM Plugin
+  lineinfile:
+    path: /etc/yum.conf
+    line: FastestMirror=True
+
+- name: Remove Packages - sendmail
+  yum:
+    name:
+      - sendmail
+    state: absent
+
+- name: Install Packages - postfix, net-snmp, ca-certificates, gdb
+  yum:
+    name: 
+      - postfix
+      - net-snmp
+      - ca-certificates
+      - gdb
+    state: present
+
+- name: Set timezone to America/Edmonton
+  community.general.timezone:
+    name: America/Edmonton

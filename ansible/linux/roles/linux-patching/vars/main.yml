@@ -1,0 +1,4 @@
+---
+# vars file for linux-patching
+
+# Put sensitive VARS in a vault - read the example playbook notes

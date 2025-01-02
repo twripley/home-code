@@ -1,0 +1,39 @@
+---
+# Configures CentOS8 for standards
+
+- name: Enable FastestMirror DNF Plugin
+  ansible.builtin.lineinfile:
+    path: /etc/dnf/dnf.conf
+    line: FastestMirror=True
+    
+- name: Remove Unnecessary Packages
+  ansible.builtin.yum:
+    name: "{{ item }}"
+    state: absent
+  loop:
+    - sendmail
+
+- name: Install Necessary Packages
+  ansible.builtin.yum:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - postfix
+    - net-snmp
+    - ca-certificates
+    - gdb
+    - htop
+    - btop
+    - libnsl
+
+- name: Disable IPv6
+  ansible.builtin.copy:
+    src: "{{ role_path }}/files/99-ipv6.conf"
+    dest: /etc/sysctl.d
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Set timezone to America/Edmonton
+  community.general.timezone:
+    name: America/Edmonton

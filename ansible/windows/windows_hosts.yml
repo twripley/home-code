@@ -1,0 +1,14 @@
+---
+# Add rules to hosts file
+
+- name: Add rules to Hosts file
+  hosts: all
+  gather_facts: no
+  become_method: runas
+
+  tasks:
+    - name: Add fake entry
+      community.windows.win_hosts:
+        state: present
+        canonical_name: tylertest
+        ip_address: 127.0.0.1

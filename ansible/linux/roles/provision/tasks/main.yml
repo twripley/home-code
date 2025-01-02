@@ -1,0 +1,12 @@
+---
+# tasks file for provision
+
+- name: Provision host for Ansible
+  include_tasks: "{{ prov_host }}"
+  with_first_found:
+    - files:
+        - "provision-{{ ansible_distribution }}-{{ ansible_distribution_major_version }}.yml"
+        - default.yml
+      skip: true
+  loop_control:
+    loop_var: prov_host

@@ -1,0 +1,9 @@
+---
+# Provision a new Linux server
+
+- hosts: all
+  become: true
+  vars_prompt:
+
+  roles:
+    - provision

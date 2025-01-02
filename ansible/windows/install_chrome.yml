@@ -1,0 +1,13 @@
+---
+# Install Chrome on Windows
+
+- name: Install Chrome from Chocolatey
+  hosts: all
+  gather_facts: no
+  become_method: runas
+
+  tasks:
+    - name: Install Google Chrome
+      chocolatey.chocolatey.win_chocolatey:
+        name: googlechrome
+        state: present

@@ -1,0 +1,30 @@
+---
+- name: Create snapshot of EC2 instance before patching
+  hosts: localhost
+  gather_facts: no
+  vars:
+    instance_id: "i-1234567890abcdef0"
+    snapshot_name: "snapshot-{{ ansible_date_time.date }}"
+  tasks:
+  - name: Create snapshot
+    ec2_snapshot:
+      instance_id: "{{ instance_id }}"
+      name: "{{ snapshot_name }}"
+      wait: yes
+      register: snapshot
+  - name: Patch instance
+    ec2_instance_facts:
+      instance_ids: "{{ instance_id }}"
+    register: instance_facts
+  - name: Stop instance
+    ec2:
+      instance_ids: "{{ instance_id }}"
+      state: stopped
+  - name: Apply patches
+    yum:
+      name: '*'
+      state: latest
+  - name: Start instance
+    ec2:
+      instance_ids: "{{ instance_id }}"
+      state: started

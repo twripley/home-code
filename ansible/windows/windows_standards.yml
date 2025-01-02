@@ -1,0 +1,48 @@
+---
+# Configure standards for Windows
+
+- name: Configure standards for Windows
+  hosts: all
+  gather_facts: no
+  become_method: runas
+
+  tasks:
+    - name: Set Timezone
+      community.windows.win_timezone:
+        timezone: Mountain Standard Time
+    
+    # Use Powershell (Get-WindowsFeature to list all features)
+    - name: Install Windows Features
+      ansible.windows.win_feature:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - SNMP-Service
+        - SNMP-WMI-Provider
+        - Telnet-Client
+  
+    - name: Configure SNMP Community
+      community.windows.win_snmp:
+        community_strings:
+        - SomeCommString
+        permitted_managers:
+        - 1.2.3.4
+        action: set
+    
+    # No NTP module - https://github.com/ansible-collections/community.windows/issues/114
+    - name: NTP Client Configuration
+      win_shell: |
+        w32tm /config /manualpeerlist:0.ca.pool.ntp.org /syncfromflags:MANUAL
+        w32tm /config /manualpeerlist:1.ca.pool.ntp.org /syncfromflags:MANUAL
+        Stop-Service w32time
+        Start-Service w32time
+
+    - name: Disable Unnecessary Services
+      ansible.windows.win_service:
+        name: "{{ item }}"
+        state: stopped
+        start_mode: disabled
+      loop:
+        - bthserv
+        - RmSvc
+

@@ -1,0 +1,37 @@
+---
+# tasks file for prep
+
+- name: Create my user
+  ansible.builtin.user:
+    name: tripley
+    state: present
+    create_home: true
+    shell: /bin/bash
+
+- name: Copy my SSH Key
+  ansible.posix.authorized_key:
+    user: tripley
+    state: present
+    key: "{{ lookup('file', '{{ role_path }}/files/tripley_ecdsa.pub') }}"
+
+- name: Copy File - 10-sudoers-secure_path
+  ansible.builtin.copy:
+    src: "{{ role_path }}/files/10-sudoers-secure_path"
+    dest: /etc/sudoers.d
+    backup: true
+
+- name: Copy File - 99-sudoers-tripley
+  ansible.builtin.copy:
+    src: "{{ role_path }}/files/99-sudoers-tripley"
+    dest: /etc/sudoers.d
+    backup: true
+
+- name: Prepare host for Ansible
+  include_tasks: "{{ prep_host }}"
+  with_first_found:
+    - files:
+        - "prepare-{{ ansible_distribution }}-{{ ansible_distribution_major_version }}.yml"
+        - default.yml
+      skip: true
+  loop_control:
+    loop_var: prep_host

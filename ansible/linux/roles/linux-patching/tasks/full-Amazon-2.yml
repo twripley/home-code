@@ -1,0 +1,10 @@
+---
+- name: Ensure yum-utils is installed
+  yum: 
+    name: yum-utils
+    state: present
+
+- name: Install latest patches
+  yum:
+    name: '*'
+    state: latest

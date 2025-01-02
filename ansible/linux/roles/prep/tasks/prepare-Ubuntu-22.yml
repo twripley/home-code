@@ -1,0 +1,35 @@
+---
+# Prepares an Ubuntu 22 host for Ansible
+
+- name: Update APT Cache
+  apt:
+    update_cache: yes
+
+- name: Install PIP for Python3
+  apt:
+    name: python3-pip
+    state: present
+
+- name: Make sure pexpect is removed from distribution
+  apt:
+    name: 
+      - python-pexpect
+      - python3-pexpect
+    state: absent
+
+- name: Install pexpect using pip
+  pip:
+    name: pexpect
+    executable: pip3
+
+- name: Install Chrony to sync time
+  apt:
+    name:
+      - chrony
+    state: present
+  notify: restart_chronyd
+
+- name: Change Default Admin Password
+  ansible.builtin.user:
+    name: netadmin
+    password: "{{ admin_pass | password_hash('sha512') }}"

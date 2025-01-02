@@ -1,0 +1,32 @@
+---
+# Provision a CentOS 9 host for Ansible
+
+- name: Find out the Ethernet Interface
+  ansible.builtin.shell:
+    cmd: "nmcli -t device | grep ethernet:connected | cut -d ':' -f 1 -"
+  register: iface
+
+# The iface variable contains multiple properties
+# iface.stdout should be the output of the command we want
+- name: "Add a static IP on {{ iface.stdout }}"
+  community.general.nmcli:
+    conn_name: "{{ iface.stdout }}"
+    ifname: "{{ iface.stdout }}"
+    type: ethernet
+    ip4: "{{ ip_subnet }}"
+    gw4: "{{ gateway }}"
+    dns4:
+      - 192.168.0.1
+    dns4_search:
+      - tylerripley.int
+    state: present
+
+# Can't use the builtin hostname for some reason
+- name: Change Hostname
+  ansible.builtin.shell:
+    cmd: "echo {{ host_name }} > /etc/hostname"
+
+# Don't wait for reboot - because the IP changed
+- name: Reboot to accept changes
+  ansible.builtin.reboot:
+    reboot_timeout: 1

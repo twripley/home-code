@@ -1,0 +1,14 @@
+---
+- name: Capture Setup
+  hosts: node1
+
+  tasks:
+
+    - name: Collect only specific facts
+      ansible.builtin.setup:
+        filter:
+        - '*distribution'
+      register: setup
+
+    - debug:
+        var: setup

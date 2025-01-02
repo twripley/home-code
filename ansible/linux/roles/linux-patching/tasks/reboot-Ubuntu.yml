@@ -1,0 +1,40 @@
+---
+- name: check if reboot is needed
+  register: reboot_required_file
+  stat: path=/var/run/reboot-required get_md5=no
+
+- name: reboot host if needed
+  block: 
+  
+  - name: Send out Reboot Email
+    become: false
+    mail:
+      host: "{{ mail_server }}"
+      port: "{{ mail_port }}"
+      from: "{{ from_email }}"
+      to: "{{ notify_email }}"
+      subject: ANSIBLE - Rebooting {{ ansible_hostname }}
+      body: |
+        System {{ ansible_hostname }} needs to be rebooted after patching.
+   
+    delegate_to: localhost
+
+  - name: Reboot host and wait for host to return
+    reboot:
+      msg: "Reboot initiated by Ansible"
+      connect_timeout: 5
+      reboot_timeout: 600
+      pre_reboot_delay: 0
+      post_reboot_delay: 60
+      test_command: whoami
+
+  - name: check if host has booted within last 300 sec
+    shell: test $(cat /proc/uptime | cut -d. -f1) -lt 300
+    changed_when: false
+    register: reboot_check
+
+  - name: alert if host has not been rebooted
+    fail:
+      msg: "{{ ansible_host }} has not booted, manual check needed"
+    when: reboot_check.rc != 0
+  when: reboot_required_file.stat.exists

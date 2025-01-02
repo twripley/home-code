@@ -1,0 +1,16 @@
+---
+# Prepare a new server
+
+# Example:
+# ansible-playbook prep-server.yml -i nonDomainHost.domain.com, -u root -k
+
+- hosts: all
+  become: true
+  vars_prompt:
+  - name: admin_pass
+    prompt: "Enter new Administrator password (on RHEL this is 'root', on Ubuntu this is 'netadmin')"
+    private: no
+
+  roles:
+    - prep
+    - standards

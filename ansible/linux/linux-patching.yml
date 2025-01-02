@@ -1,0 +1,50 @@
+# Use the linux-patching role to patch our Linux servers
+
+# Sensitive VARS are kept in an encrypted vault so they are not kept in GitHub
+# I'm putting the vault and vault pass in /root, so run the following commands to create the vault:
+
+# sudo -s
+# cd /root
+# ansible-vault create linux-patching-vault.yml
+# ansible-vault edit linux-patching-vault.yml
+
+# NOTE: If you put the vault in a separate location, edit the vars_files path below
+
+# Make sure to put the following variables inside the vault:
+# vcenter_hostname: "vcenter.example.com"
+# vcenter_username: "username"
+# vcenter_password: "password"
+# notify_email: User1 <user1@host.com>, User2 <user2@host.com> # Comma separated list of emails for notifications
+# from_email: Ansible Controller <ansible@ansible.com> # From address for notifications
+# mail_server: mail.mail.com # SMTP server for email notifications
+# mail_port: 25 # SMTP server port
+
+# Next, create a file called 'linux-patching-vault-pass.txt' and put the vault password
+# in that file.  Set the appropriate permissions on the file to protect it.
+
+# For example I only want root to be able to read this file. 
+# sudo echo 'vaultpass' > /root/linux-patching-vault-pass.txt
+# sudo chown root /root/linux-patching-vault-pass.txt
+# sudo chmod 600 /root/linux-patching-vault-pass.txt
+
+# Usage
+# Since we need to read the vault and vault password file, this must be run as root (or the other user that owns that vault and pass file)
+# sudo ansible-playbook linux-patching.yml -i {host(s)}, --vault-password-file=/root/linux-patching-vault-pass.txt
+
+---
+- hosts: all
+  become: yes
+  vars_prompt:
+  - name: vm_guest_name
+    prompt: "What is the name of the VM we are patching?  This is the VM name in vCenter!"
+    private: no
+
+  vars_files:
+    - /root/linux-patching-vault.yml
+
+  roles:
+    - linux-patching
+
+  vars:
+    - ospatch_level: full
+    - ospatch_reboot: true

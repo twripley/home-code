@@ -1,0 +1,29 @@
+---
+## Prepares a Red Hat 7 server for Ansible
+
+- name: Install EPEL Repo
+  yum:
+    name: https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+    state: present
+
+- name: Remove Packages - pexpect
+  yum:
+    name:
+      - pexpect
+    state: absent
+
+- name: Install Packages - PIP, chrony
+  yum:
+    name: 
+      - python2-pip
+      - chrony
+    state: present
+
+- name: Install pexpect using pip
+  pip:
+    name: pexpect
+
+- name: Change Default Admin Password
+  ansible.builtin.user:
+    name: root
+    password: "{{ admin_pass | password_hash('sha512') }}"

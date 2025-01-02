@@ -1,0 +1,50 @@
+---
+# tasks file for linux-patching
+
+- name: check if host is online
+  include_tasks: ping.yml
+
+- name: Take a snapshot of the Guest
+  include_tasks: snapshot.yml
+
+- name: Send out PRE Email
+  become: false
+  mail:
+    host: "{{ mail_server }}"
+    port: "{{ mail_port }}"
+    from: "{{ from_email }}"
+    to: "{{ notify_email }}"
+    subject: ANSIBLE - Starting to Patch {{ ansible_hostname }}
+    body: System {{ ansible_hostname }} is starting to be patched.
+  delegate_to: localhost
+
+- include_tasks: "{{ patch_host }}"
+  with_first_found:
+    - files:
+        - "{{ ospatch_level }}-{{ ansible_distribution }}-{{ ansible_distribution_major_version }}.yml"
+        - "{{ ospatch_level }}-{{ ansible_distribution }}.yml"
+        - default.yml
+      skip: true
+  loop_control:
+    loop_var: patch_host
+
+- include_tasks: "{{ boot_host }}"
+  with_first_found:
+    - files:
+        - "reboot-{{ ansible_distribution }}-{{ ansible_distribution_major_version }}.yml"
+        - "reboot-{{ ansible_distribution }}.yml"
+        - default.yml
+      skip: true
+  loop_control:
+    loop_var: boot_host
+  when: ospatch_reboot
+
+- include_tasks: "{{ post_host }}"
+  with_first_found:
+    - files:
+        - "post-{{ ansible_distribution }}-{{ ansible_distribution_major_version }}.yml"
+        - "post-{{ ansible_distribution }}.yml"
+        - default.yml
+      skip: true
+  loop_control:
+    loop_var: post_host

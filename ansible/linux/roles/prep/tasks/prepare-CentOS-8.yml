@@ -1,0 +1,38 @@
+---
+# Prepares a CentOS 8 host for Ansible
+
+- name: Install EPEL Repo
+  yum:
+    name: epel-release
+    state: present
+
+- name: Install PIP for Python3
+  yum:
+    name: python3-pip
+    state: present
+
+# Removing PIP update
+# - name: Update PIP
+#   command: pip3 install --upgrade pip
+#   register: updatepip
+#   changed_when: "'Collecting pip' in updatepip.stdout"
+
+- name: Make sure pexpect is removed from distribution
+  yum:
+    name: pexpect
+    state: absent
+
+- name: Install pexpect using pip
+  pip:
+    name: pexpect
+
+- name: Install Chrony to sync time
+  yum:
+    name:
+      - chrony
+    state: present
+
+- name: Change Default Admin Password
+  ansible.builtin.user:
+    name: root
+    password: "{{ admin_pass | password_hash('sha512') }}"

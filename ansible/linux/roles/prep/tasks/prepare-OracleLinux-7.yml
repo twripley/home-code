@@ -1,0 +1,36 @@
+---
+# Prepares an OEL 7 host
+
+- name: Install EPEL Repo
+  yum:
+    name: oracle-epel-release-el7
+    state: present
+
+# Yum repos have changed, so run ol_yum_configure
+- name: Update Oracle repos
+  command: /usr/bin/ol_yum_configure.sh
+
+- name: Install PIP for Python2
+  yum:
+    name: python2-pip
+    state: present
+
+- name: Make sure pexpect is removed from distribution
+  yum:
+    name: pexpect
+    state: absent
+
+- name: Install pexpect using pip
+  pip:
+    name: pexpect
+
+- name: Install Chrony to sync time
+  yum:
+    name:
+      - chrony
+    state: present
+
+- name: Change Default Admin Password
+  ansible.builtin.user:
+    name: root
+    password: "{{ admin_pass | password_hash('sha512') }}"

@@ -1,0 +1,12 @@
+---
+# Ensures all servers conform to standards
+
+- name: OS Specific Tasks
+  include_tasks: "{{ prep_host }}"
+  with_first_found:
+    - files:
+        - "Standards-{{ ansible_distribution }}-{{ ansible_distribution_major_version }}.yml"
+        - default.yml
+      skip: true
+  loop_control:
+    loop_var: prep_host

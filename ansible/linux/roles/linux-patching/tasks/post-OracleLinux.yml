@@ -1,0 +1,24 @@
+---
+- name: Get last installation details
+  shell: yum history info
+  args:
+    warn: false
+  register: last_yum
+
+- name: Find uptime
+  shell: uptime -p
+  register: get_uptime
+
+- name: Send out POST Email
+  become: false
+  mail:
+    host: "{{ mail_server }}"
+    port: "{{ mail_port }}"
+    from: "{{ from_email }}"
+    to: "{{ notify_email }}"
+    subject: ANSIBLE - Completed Patching {{ ansible_hostname }}
+    body: |
+      Uptime: {{ get_uptime.stdout }}
+
+      {{ last_yum.stdout }}
+  delegate_to: localhost
