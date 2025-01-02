@@ -1,0 +1,20 @@
+---
+  hosts: all
+  gather_facts: true
+  # Variables
+  homedir: "{{ lookup('env','HOME') }}"
+  srcdir: "{{ homedir }}/.src"
+
+  tasks:
+    # Install Yay
+    - name: Clone yay from AUR
+      git:
+        repo: https://aur.archlinux.org/yay-bin.git
+        dest: "{{ srcdir }}/yay"
+        update: true
+
+    - name: Build and install yay
+      command:
+        chdir: "{{ srcdir }}/yay"
+        cmd: "makepkg -sfi --noconfirm"
+        creates: /usr/bin/yay
