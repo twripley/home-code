@@ -1,0 +1,11 @@
+---
+- name: Prepare a fresh Arch install
+  hosts: all
+  gather_facts: true
+  vars:
+    homedir: "{{ lookup('env','HOME') }}"
+    srcdir: "{{ homedir }}/.src"
+
+  tasks:
+    - name: Install Yay
+      ansible.builtin.include_tasks: arch-installyay.yml

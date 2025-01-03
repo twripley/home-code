@@ -1,20 +1,32 @@
 ---
-  hosts: all
-  gather_facts: true
-  # Variables
-  homedir: "{{ lookup('env','HOME') }}"
-  srcdir: "{{ homedir }}/.src"
 
-  tasks:
-    # Install Yay
-    - name: Clone yay from AUR
-      git:
-        repo: https://aur.archlinux.org/yay-bin.git
-        dest: "{{ srcdir }}/yay"
-        update: true
+- name: Install Prerequisites
+  community.general.pacman:
+    name:
+      - git
+    state: present
+  become: true
 
-    - name: Build and install yay
-      command:
-        chdir: "{{ srcdir }}/yay"
-        cmd: "makepkg -sfi --noconfirm"
-        creates: /usr/bin/yay
+- name: Clone yay from AUR
+  ansible.builtin.git:
+    repo: https://aur.archlinux.org/yay-bin.git
+    dest: "{{ srcdir }}/yay"
+    update: true
+
+- name: Build yay
+  ansible.builtin.command:
+    chdir: "{{ srcdir }}/yay"
+    cmd: "makepkg -sf --noconfirm"
+
+- name: Find Yay Packages
+  ansible.builtin.find:
+    paths: "{{ srcdir }}/yay"
+    patterns: "*.pkg.tar.zst"
+  register: yaypkgs
+
+- name: Install Yay
+  community.general.pacman:
+    name: "{{ item.path }}"
+    state: present
+  become: true
+  loop: "{{ yaypkgs.files }}"
